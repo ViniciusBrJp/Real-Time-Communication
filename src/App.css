@@ -54,3 +54,33 @@ nav ul li a:hover {
 .RoomList {
   text-align: center;
 }
+
+.btn-flat {
+  background-color: purple;
+}
+.UserCardContainer {
+  height: 20vh;
+
+  flex-direction: column;
+}
+.UserCard {
+  transform: translate(50%,0);
+  width: 50%;
+  height: 50%;
+}
+
+.UserCardHeader {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.UserCardBody {
+  display: flex;
+  justify-content: left;
+}
+
+.UserCardInput {
+  border: none;
+  outline: none;
+}

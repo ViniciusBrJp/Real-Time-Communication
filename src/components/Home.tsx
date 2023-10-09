@@ -1,10 +1,13 @@
-import React, { createContext, useEffect, useState } from 'react'
+import React, { createContext, useEffect, useRef, useState } from 'react'
 import { RoomId } from '../Types/RoomId';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 import RoomList from './RoomList';
 
 export const Data = createContext<RoomId[] | undefined>(undefined);
 
 const Home: React.FC = () => {
+  const [message, setMessage] = useState<string>();
+  const socketRef = useRef<ReconnectingWebSocket>()
   const [data, setData] = useState<RoomId[] | undefined>(undefined);
 
   useEffect(() => {
@@ -17,6 +20,19 @@ const Home: React.FC = () => {
       console.error("Fetching error: ", error);
       alert("error");
     });
+
+    const websocket = new ReconnectingWebSocket('ws://localhost:3100')
+    socketRef.current = websocket
+
+    const onMessage = (event: MessageEvent<string>) => {
+      setMessage(event.data)
+    }
+    websocket.addEventListener('message', onMessage)
+
+    return () => {
+      websocket.close()
+      websocket.removeEventListener('message',onMessage)
+    }
   },[]);
 
     if(data) {
@@ -26,15 +42,37 @@ const Home: React.FC = () => {
             <div className="RoomList">
               <h3 className="RoomListHeader">Room List</h3>
               <Data.Provider value={data}>
-                <RoomList />
+                
               </Data.Provider>
             </div>
+            <div>
+              メッセージ: {message}
+            </div>
+            <button 
+              type="button"
+              onClick={() => {
+              socketRef.current?.send("あ")
+            }}
+            >
+              送信
+            </button>
         </div>
       )
     } else {
       return (
         <div>
           <h1 className="HomeHeader">HOME</h1>
+          <div>
+              メッセージ: {message}
+            </div>
+            <button 
+              type="button"
+              onClick={() => {
+              socketRef.current?.send("あ")
+            }}
+            >
+              送信
+            </button>
         </div>
       )
     }

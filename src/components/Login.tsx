@@ -4,28 +4,21 @@ import { useContext } from 'react';
 import { Data } from './Home';
 
 
-type RoomId = {
-  id: number;
-  name: string;
-  password: string;
-  user1: string;
-  user2: string;
-}
-
 
 const Login = () => {
   const data = useContext(Data);
   const { id } = useParams<string>();
+  const apiId = id ? parseInt(id) + 1 : undefined;
   const [passWord, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const pw = (data && id && data[parseInt(id)].password) ? data[parseInt(id)].password : '';
+  const pw = (data && apiId && data[apiId].password) ? data[apiId].password : '';
 
   const handleLogin = () => {
     if(passWord.trim() === pw) {
       console.log("Login");
       localStorage.setItem('token', 'example.token');
-      navigate('/room/' + id)
+      navigate('/room/' + apiId)
     } else {
       console.log('failed');
     }
@@ -36,7 +29,7 @@ const Login = () => {
       <div>
       <h2>パスワードを入力site</h2>
       <h3>API取得できてないから何も入れなくても入れる</h3>
-      <p>{id}</p>
+      <p>{apiId}</p>
               <form>
                   <input
                       type="password"

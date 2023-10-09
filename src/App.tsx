@@ -5,6 +5,7 @@ import Header from './components/Header';
 import Home from './components/Home';
 import RoomDetail from './components/RoomDetail';
 import Login from './components/Login';
+import Chat from "./components/Chat";
 
 function App() {
   return (
@@ -12,7 +13,7 @@ function App() {
     <div className="App">
       <Header />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Chat />} />
           <Route path="/room/:id" element={<RoomDetail />} />
           <Route path="/room/login/:id" element={<Login />} />
         </Routes>

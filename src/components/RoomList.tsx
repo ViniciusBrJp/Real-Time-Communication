@@ -10,12 +10,14 @@ import { Data } from "./Home";
 const RoomList: React.FC = () => {
     const data = useContext(Data);
 
+    if(data) console.log("RoomList:" , data);
+
     if (Array.isArray(data)) {
       return (
         <div className="roomList">
           {data.map((room, index) => (
             <div key={index}>
-                <Link to={`/room/login/${index}`}>{room.name}</Link>
+                <Link to={`/room/login/${index+1}`}>{room.name}</Link>
             </div>
           ))}
         </div>
