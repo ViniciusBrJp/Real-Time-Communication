@@ -47,6 +47,21 @@ nav ul li a:hover {
   color: blue;
 }
 
+.HomeHeaderNav {
+  list-style: none;
+  display: inline-block;
+  margin-right: 10px;
+  font-size: 19px;
+  text-decoration: none;
+  color: var(--white-color);
+  transition: all 1.0s;
+}
+
+.HomeHeaderNav :hover {
+  font-size: 25px;
+  color: blue;
+}
+
 .HomeHeader {
   text-align: center;
 }

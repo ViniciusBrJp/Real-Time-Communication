@@ -1,17 +1,20 @@
 import React, { createContext, useEffect, useRef, useState } from 'react'
 import { RoomId } from '../Types/RoomId';
-import ReconnectingWebSocket from 'reconnecting-websocket';
 import RoomList from './RoomList';
+import { Box, Button, Paper, TextField, Typography } from '@mui/material';
+import axios from 'axios';
+
+
+
 
 export const Data = createContext<RoomId[] | undefined>(undefined);
-
+const URL = `http://157.7.88.252/api/rooms`;
 const Home: React.FC = () => {
-  const [message, setMessage] = useState<string>();
-  const socketRef = useRef<ReconnectingWebSocket>()
+
   const [data, setData] = useState<RoomId[] | undefined>(undefined);
 
   useEffect(() => {
-    fetch("http://157.7.88.252/api/rooms")
+    fetch(URL)
     .then((res) => res.json())
     .then((json: RoomId[]) => {
       console.log("Fetchdata:", json);
@@ -20,59 +23,35 @@ const Home: React.FC = () => {
       console.error("Fetching error: ", error);
       alert("error");
     });
-
-    const websocket = new ReconnectingWebSocket('ws://localhost:3100')
-    socketRef.current = websocket
-
-    const onMessage = (event: MessageEvent<string>) => {
-      setMessage(event.data)
-    }
-    websocket.addEventListener('message', onMessage)
-
-    return () => {
-      websocket.close()
-      websocket.removeEventListener('message',onMessage)
-    }
   },[]);
-
     if(data) {
       return (
-        <div>
-          <h1 className="HomeHeader">HOME</h1>
-            <div className="RoomList">
-              <h3 className="RoomListHeader">Room List</h3>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 4, width: '100%'}}>
+      <Typography variant="h4" gutterBottom>
+        HOME
+      </Typography>
+      {data ? (
+        <Box sx={{display: 'flex', flexDirection: 'row', width: '100%'}}>
+        <Paper elevation={2}  sx={{ m: 2, p: 2, width: '95%'}}>
+              <Typography variant="h6" gutterBottom>
+                Room List
+              </Typography>
               <Data.Provider value={data}>
-                
+                <RoomList />
               </Data.Provider>
-            </div>
-            <div>
-              メッセージ: {message}
-            </div>
-            <button 
-              type="button"
-              onClick={() => {
-              socketRef.current?.send("あ")
-            }}
-            >
-              送信
-            </button>
-        </div>
+            </Paper>
+            
+        </Box>
+            
+      ) : (
+        <Typography variant="body1">Loading...</Typography>
+      )}
+    </Box>
       )
     } else {
       return (
         <div>
           <h1 className="HomeHeader">HOME</h1>
-          <div>
-              メッセージ: {message}
-            </div>
-            <button 
-              type="button"
-              onClick={() => {
-              socketRef.current?.send("あ")
-            }}
-            >
-              送信
-            </button>
         </div>
       )
     }
