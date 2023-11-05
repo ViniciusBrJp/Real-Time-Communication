@@ -5,25 +5,6 @@ import { Box, List, ListItem, ListItemText } from '@mui/material';
 
 const RoomList: React.FC = () => {
   const data = useContext(Data);
-  const handleEnterRoom = (roomId: number) => {
-    // WebSocketコネクションを開始または使用する
-    const socket = new WebSocket('ws://localhost:3100');
-    const message = `0 ${roomId} 1 `;
-    console.log(message);
-    socket.onopen = () => {
-      // WebSocketが開いたらメッセージを送信
-
-      socket.send(message);
-
-      // 必要に応じて、ここで接続をクローズ
-      socket.close();
-    };
-
-    // エラーハンドリング
-    socket.onerror = (error) => {
-      console.error('WebSocket Error:', error);
-    };
-  };
 
   if (Array.isArray(data)) {
     return (
@@ -44,8 +25,7 @@ const RoomList: React.FC = () => {
               },
               cursor: 'pointer'
             }}
-            onClick={() => handleEnterRoom(room.id)} // onClickイベントハンドラの追加
-          >
+           >
             <ListItem component={Link} to={`/chat/${room.id}`}>
               <ListItemText primary={room.id} />
             </ListItem>
