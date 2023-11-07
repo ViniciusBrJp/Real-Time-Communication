@@ -2,7 +2,6 @@ import React, { createContext, useEffect, useRef, useState } from 'react'
 import { RoomId } from '../Types/RoomId';
 import RoomList from './RoomList';
 import { Box, Button, Paper, TextField, Typography } from '@mui/material';
-import axios from 'axios';
 
 
 
@@ -26,27 +25,27 @@ const Home: React.FC = () => {
   },[]);
     if(data) {
       return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 4, width: '100%'}}>
-      <Typography variant="h4" gutterBottom>
-        HOME
-      </Typography>
-      {data ? (
-        <Box sx={{display: 'flex', flexDirection: 'row', width: '100%'}}>
-        <Paper elevation={2}  sx={{ m: 2, p: 2, width: '95%'}}>
-              <Typography variant="h6" gutterBottom>
-                Room List
-              </Typography>
-              <Data.Provider value={data}>
-                <RoomList />
-              </Data.Provider>
-            </Paper>
-            
-        </Box>
-            
-      ) : (
-        <Typography variant="body1">Loading...</Typography>
-      )}
-    </Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 4, width: '100%'}}>
+        <Typography variant="h4" gutterBottom>
+          HOME
+        </Typography>
+        {data ? (
+          <Box sx={{display: 'flex', flexDirection: 'row'}}>
+          <Paper elevation={2}  sx={{ m: 2, p: 2, width: '95%'}}>
+                <Typography variant="h6" gutterBottom>
+                  Room List
+                </Typography>
+                <Data.Provider value={data}>
+                  <RoomList />
+                </Data.Provider>
+              </Paper>
+              
+          </Box>
+              
+        ) : (
+          <Typography variant="body1">Loading...</Typography>
+        )}
+      </Box>
       )
     } else {
       return (

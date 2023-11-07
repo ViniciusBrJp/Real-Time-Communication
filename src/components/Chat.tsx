@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import Button from '@mui/material/Button';
+import React, { useEffect, useState, useRef } from 'react';
 import Input from '@mui/material/Input';
 import { useParams } from 'react-router-dom';
 import { Box, Paper, Typography } from '@mui/material';
@@ -22,61 +21,89 @@ const Chat = () => {
   const { id } = useParams<{ id: string }>();
   const apiId = id ? parseInt(id, 10) : undefined;
 
-  // WebSocketインスタンスを生成
-  const socket = new WebSocket('ws://localhost:3100');
+  // useRefを使ってWebSocketのインスタンスを保持する
+  const socketRef = useRef<WebSocket | null>(null);
 
-  // メッセージ受信のためのイベントリスナーをセットアップ
   useEffect(() => {
-    const onMessage = (event: { data: any; }) => {
+    // WebSocketのインスタンスを生成し、refに保持する
+    socketRef.current = new WebSocket('ws://localhost:3100');
+
+    const onMessage = (event: { data: any }) => {
       setMessages((prev) => [...prev, { sender: 'user2', content: event.data }]);
     };
 
-    socket.addEventListener('message', onMessage);
+    socketRef.current.addEventListener('message', onMessage);
 
+    // コンポーネントのアンマウント時に実行するクリーンアップ関数
     return () => {
-      socket.removeEventListener('message', onMessage);
-      socket.close();
+      if (socketRef.current) {
+        socketRef.current.removeEventListener('message', onMessage);
+        socketRef.current.close();
+      }
     };
   }, []);
 
   const [enteringRoom, setEnteringRoom] = useState<boolean>(false);
-  const [enterRoomError, setEnterRoomError] = useState<String | null>(null);
+  const [enterRoomError, setEnterRoomError] = useState<string | null>(null);
 
-  // ルームに入室するための関数
   const handleEnterRoom = (roomId: number) => {
+    
     setEnteringRoom(true);
     setEnterRoomError(null);
 
-    if (socket.readyState === WebSocket.OPEN) {
+    if (socketRef.current?.readyState === WebSocket.OPEN) {
       const message = `0 ${roomId} 1 `;
-      socket.send(message);
+      socketRef.current.send(message);
     } else {
       setEnteringRoom(false);
       setEnterRoomError('WebSocket is not open. Cannot enter room.');
       console.error('WebSocket is not open. Cannot enter room.');
     }
   };
-
-  // APIからチャットルームの情報を取得し、WebSocketを介してルームに入室
   useEffect(() => {
-    if (apiId) {
-      fetch(`http://157.7.88.252/api/rooms/${apiId}`)
-        .then((res) => res.json())
-        .then((json: RoomId[]) => {
+    // WebSocketが接続されたら、ルームに入室する
+    const onOpen = () => {
+      if (apiId && room) {
+        handleEnterRoom(room.id);
+      }
+    };
+  
+    if (socketRef.current) {
+      socketRef.current.addEventListener('open', onOpen);
+    }
+  
+    // コンポーネントのアンマウント時に実行するクリーンアップ関数
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.removeEventListener('open', onOpen);
+      }
+    };
+  }, [apiId, room]); // 依存配列にapiIdとroomを追加
+
+  useEffect(() => {
+    // APIからチャットルームの情報を取得し、WebSocketを介してルームに入室する準備をする
+    const fetchRoom = async () => {
+      if (apiId) {
+        try {
+          const response = await fetch(`http://157.7.88.252/api/rooms/${apiId}`);
+          const json: RoomId[] = await response.json();
           const specificRoom = json.find((room) => room.id === apiId);
           if (specificRoom) {
             setRoom(specificRoom);
-            handleEnterRoom(specificRoom.id);
           }
-        });
-    }
-  }, []);
+        } catch (error) {
+          console.error('Error fetching room data:', error);
+        }
+      }
+    };
+  
+    fetchRoom();
+  }, [apiId]); // 依存配列にapiIdを追加
 
-  // メッセージ送信のハンドラー
-  const handleSendMessage = () => {
-    if (socket.readyState === WebSocket.OPEN) {
-      const sendMessage = '1' + inputMessage;
-      socket.send(sendMessage);
+  const handleSendMessage = (message: string) => {
+    if (socketRef.current?.readyState === WebSocket.OPEN) {
+      const sendMessage = `1 ${message}`;
+      socketRef.current.send(sendMessage);
       setMessages((prev) => [...prev, { sender: 'user1', content: inputMessage }]);
       setInputMessage('');
     } else {
@@ -85,17 +112,20 @@ const Chat = () => {
   };
 
   return (
-    <Box sx={{ border: 1, display: 'flex', flexDirection: 'column', height: '80vh', p: 2 }}>
+    <Box sx={{ border: 1, display: 'flex', flexDirection: 'column', height: '80vh', p: 2,width: '100%' }}>
       <Box sx={{ border: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1, height: '20%' }}>
         <Input
           fullWidth
           placeholder="メッセージを入力"
           value={inputMessage}
-          onChange={(e) => setInputMessage(e.target.value)}
+          onChange={(e) => {
+            const message = e.target.value;
+            setInputMessage(message);
+            if( message.trim() ) {
+              handleSendMessage(message);
+            }
+          }}
         />
-        <Button variant="contained" onClick={handleSendMessage} sx={{ ml: 1 }}>
-          Send
-        </Button>
       </Box>
 
       <Box sx={{ border: 1, overflowY: 'auto', flexGrow: 1, p: 1 }}>
