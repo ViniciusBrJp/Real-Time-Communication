@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Box, Paper, Typography, Input } from "@mui/material";
 
 type Message = {
@@ -20,21 +20,18 @@ const Chat = () => {
   const { id } = useParams<{ id: string }>();
   const apiId = id ? parseInt(id, 10) : undefined;
   const socketRef = useRef<WebSocket | null>(null);
-  const navigate = useNavigate();
-
-  // 入室時のエラーを追跡するためのステート
   const [enterRoomError, setEnterRoomError] = useState<string | null | boolean>(
     "Loading"
   );
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // WebSocketのインスタンスを生成し、refに保持する
     socketRef.current = new WebSocket("ws://localhost:3100");
 
     const onMessage = (event: { data: any }) => {
       const message = event.data;
       if (message.startsWith("0")) {
-        handleRoomResponse(message);
+        const msg = handleRoomResponse(message.substring(1));
       } else {
         setMessages((prev) => [...prev, { sender: "user2", content: message }]);
       }
@@ -44,37 +41,34 @@ const Chat = () => {
 
     return () => {
       if (socketRef.current) {
-        socketRef.current.removeEventListener("message", onMessage);
+        if (socketRef.current.readyState === WebSocket.OPEN && apiId) {
+          const exitRoomMessage = `0 ${apiId} 0`;
+          socketRef.current.send(exitRoomMessage);
+        }
         socketRef.current.close();
       }
     };
-  }, []);
+  }, [apiId]);
 
-  // 入室リクエストを送信する関数
   const sendEnterRoomRequest = () => {
     if (socketRef.current?.readyState === WebSocket.OPEN && apiId) {
-      const enterRoomMessage = `0 ${apiId} 1`;
+      const enterRoomMessage = `0 ${apiId}`;
       socketRef.current.send(enterRoomMessage);
     } else {
       setEnterRoomError("WebSocket is not open. Cannot enter room.");
     }
   };
 
-  // 入室リクエストの応答を処理する関数
   const handleRoomResponse = (response: string) => {
     if (response.startsWith("OK")) {
-      // 入室許可の処理（必要に応じてUIを更新）
-      setEnterRoomError("OK");
+      setEnterRoomError(true);
     } else {
-      // 入室不可（満室など）の処理
-      alert("error");
       setEnterRoomError("NG");
-      navigate("/");
+      navigate("/roomlist");
     }
   };
 
   useEffect(() => {
-    // WebSocketが接続されたら、ルームに入室する
     const onOpen = () => {
       sendEnterRoomRequest();
     };
@@ -91,7 +85,6 @@ const Chat = () => {
   }, [apiId]);
 
   useEffect(() => {
-    // APIからチャットルームの情報を取得
     const fetchRoom = async () => {
       if (apiId) {
         try {
@@ -109,7 +102,6 @@ const Chat = () => {
     fetchRoom();
   }, [apiId]);
 
-  // メッセージ送信機能
   const handleSendMessage = (message: string) => {
     if (socketRef.current?.readyState === WebSocket.OPEN) {
       const sendMessage = `1 ${message}`;
@@ -121,7 +113,11 @@ const Chat = () => {
     }
   };
 
-  if (enterRoomError == "OK") {
+  if (enterRoomError == "Loading") {
+    return <p>Loading...</p>;
+  } else if (enterRoomError == "NG") {
+    return <p>Error: Unable to enter room.</p>;
+  } else {
     return (
       <Box
         sx={{
@@ -174,10 +170,6 @@ const Chat = () => {
         </Box>
       </Box>
     );
-  } else if (enterRoomError == "NG") {
-    return <p>error</p>;
-  } else {
-    return <p>Loading...</p>;
   }
 };
 
