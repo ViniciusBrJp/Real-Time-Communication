@@ -121,11 +121,7 @@ const Chat = () => {
     }
   };
 
-  if (enterRoomError == "Loading") {
-    return <p>Loading</p>;
-  } else if (enterRoomError == "NG") {
-    return <p>error</p>;
-  } else {
+  if (enterRoomError == "OK") {
     return (
       <Box
         sx={{
@@ -178,6 +174,10 @@ const Chat = () => {
         </Box>
       </Box>
     );
+  } else if (enterRoomError == "NG") {
+    return <p>error</p>;
+  } else {
+    return <p>Loading...</p>;
   }
 };
 
