@@ -53,7 +53,7 @@ const Chat = () => {
   // 入室リクエストを送信する関数
   const sendEnterRoomRequest = () => {
     if (socketRef.current?.readyState === WebSocket.OPEN && apiId) {
-      const enterRoomMessage = `0 ${apiId}`;
+      const enterRoomMessage = `0 ${apiId} 1`;
       socketRef.current.send(enterRoomMessage);
     } else {
       setEnterRoomError("WebSocket is not open. Cannot enter room.");
@@ -64,7 +64,7 @@ const Chat = () => {
   const handleRoomResponse = (response: string) => {
     if (response.startsWith("OK")) {
       // 入室許可の処理（必要に応じてUIを更新）
-      setEnterRoomError(true);
+      setEnterRoomError("OK");
     } else {
       // 入室不可（満室など）の処理
       alert("error");
