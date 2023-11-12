@@ -38,10 +38,8 @@ const Home: React.FC = () => {
                 <Data.Provider value={data}>
                   <RoomList />
                 </Data.Provider>
-              </Paper>
-              
-          </Box>
-              
+              </Paper>  
+          </Box>  
         ) : (
           <Typography variant="body1">Loading...</Typography>
         )}

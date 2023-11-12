@@ -47,9 +47,6 @@ nav ul li a:hover {
   color: blue;
 }
 
-
-
-
 :root {
   --primary-color: #635bff;
   --secondary: #0a2540;
@@ -57,11 +54,8 @@ nav ul li a:hover {
 
 body {
   width: 100%;
-  font-family: "sohne-var",
-  "Helvetica Neue","Arial",
-  sans-serif;
+  font-family: "sohne-var", "Helvetica Neue", "Arial", sans-serif;
 }
-
 
 * {
   box-sizing: border-box;
@@ -85,7 +79,6 @@ body {
   gap: 16px;
 }
 
-
 .content {
   padding: 20px;
   flex-grow: 1;
@@ -97,13 +90,12 @@ body {
   flex-direction: column;
   border-bottom-left-radius: 40px;
   border-bottom-right-radius: 40px;
-  box-shadow: 0px 18px 36px -18px 
-  rgba(0,0,0,0.1),
-  0px 30px 45px -30px rgba(33, 33, 210, 0.25);
+  box-shadow: 0px 18px 36px -18px rgba(0, 0, 0, 0.1),
+    0px 30px 45px -30px rgba(33, 33, 210, 0.25);
   background-color: white;
   cursor: pointer;
   width: 100%;
-  flex-basis: 330px;
+  flex-basis: 300px;
   padding: 40px;
   min-height: 500px;
   transition: all 0.2s ease-in-out;
