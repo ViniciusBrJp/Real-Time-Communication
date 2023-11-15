@@ -32,7 +32,7 @@ const RoomList: React.FC = () => {
                 <div className="content">
                   <h1>Room {room.id}</h1>
                   <p>User1: {room.user1 ? room.user1 : "null"}</p>
-                  <p>User2: {room.user1 ? room.user1 : "null"}</p>
+                  <p>User2: {room.user2 ? room.user2 : "null"}</p>
                 </div>
                 <div className="action-bottom-bar">
                   <a href="#">{room.user1 && room.user2 ? "Full" : " Join"}</a>

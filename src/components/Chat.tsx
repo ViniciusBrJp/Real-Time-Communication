@@ -26,33 +26,28 @@ const Chat = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    socketRef.current = new WebSocket("ws://localhost:3100");
+    socketRef.current = new WebSocket("ws://157.7.88.252/ws");
 
     const onMessage = (event: { data: any }) => {
       const message = event.data;
       if (message.startsWith("0")) {
         const msg = handleRoomResponse(message.substring(1));
-      } else {
-        setMessages((prev) => [...prev, { sender: "user2", content: message }]);
+      } else if (message.startsWith("1")) {
+        setMessages(() => [{ sender: "user2", content: message.substring(1) }]);
       }
     };
 
     socketRef.current.addEventListener("message", onMessage);
 
     return () => {
-      if (socketRef.current) {
-        if (socketRef.current.readyState === WebSocket.OPEN && apiId) {
-          const exitRoomMessage = `0 ${apiId} 0`;
-          socketRef.current.send(exitRoomMessage);
-        }
-        socketRef.current.close();
-      }
+      socketRef.current?.removeEventListener("message", onMessage);
+      socketRef.current?.close();
     };
-  }, [apiId]);
+  }, []);
 
   const sendEnterRoomRequest = () => {
     if (socketRef.current?.readyState === WebSocket.OPEN && apiId) {
-      const enterRoomMessage = `0 ${apiId}`;
+      const enterRoomMessage = `0 ${apiId} 1`;
       socketRef.current.send(enterRoomMessage);
     } else {
       setEnterRoomError("WebSocket is not open. Cannot enter room.");
@@ -64,7 +59,7 @@ const Chat = () => {
       setEnterRoomError(true);
     } else {
       setEnterRoomError("NG");
-      navigate("/roomlist");
+      navigate("/");
     }
   };
 
@@ -82,7 +77,7 @@ const Chat = () => {
         socketRef.current.removeEventListener("open", onOpen);
       }
     };
-  }, [apiId]);
+  }, []);
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -100,24 +95,18 @@ const Chat = () => {
     };
 
     fetchRoom();
-  }, [apiId]);
+  }, []);
 
   const handleSendMessage = (message: string) => {
     if (socketRef.current?.readyState === WebSocket.OPEN) {
       const sendMessage = `1 ${message}`;
       socketRef.current.send(sendMessage);
-      setMessages((prev) => [...prev, { sender: "user1", content: message }]);
-      setInputMessage("");
     } else {
       console.error("WebSocket is not open. Cannot send message.");
     }
   };
 
-  if (enterRoomError == "Loading") {
-    return <p>Loading...</p>;
-  } else if (enterRoomError == "NG") {
-    return <p>Error: Unable to enter room.</p>;
-  } else {
+  if (enterRoomError == "OK") {
     return (
       <Box
         sx={{
@@ -170,6 +159,10 @@ const Chat = () => {
         </Box>
       </Box>
     );
+  } else if (enterRoomError == "NG") {
+    return <p>Error: Unable to enter room.</p>;
+  } else {
+    return <p>Loading...</p>;
   }
 };
 
